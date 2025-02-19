@@ -2,6 +2,7 @@ const std = @import("std");
 const clap = @import("clap");
 const mem = std.mem;
 const Allocator = mem.Allocator;
+const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
 const Delta = struct {
@@ -11,7 +12,7 @@ const Delta = struct {
     fn parse(alloc: Allocator, buf: []const u8) !Delta {
         var hours: u8 = 0;
         var minutes: u8 = 0;
-        var number = std.ArrayList(u8).init(alloc);
+        var number = ArrayList(u8).init(alloc);
         defer number.deinit();
 
         for (buf) |c| {
