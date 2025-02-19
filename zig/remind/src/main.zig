@@ -5,10 +5,10 @@ const Delta = struct {
     hours: u8,
     minutes: u8,
 
-    fn parse(allocator: std.mem.Allocator, buf: []const u8) !Delta {
+    fn parse(alloc: std.mem.Allocator, buf: []const u8) !Delta {
         var hours: u8 = 0;
         var minutes: u8 = 0;
-        var number = std.ArrayList(u8).init(allocator);
+        var number = std.ArrayList(u8).init(alloc);
         defer number.deinit();
 
         for (buf) |c| {
