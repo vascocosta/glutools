@@ -2,20 +2,22 @@ const std = @import("std");
 const clap = @import("clap");
 const mem = std.mem;
 const Allocator = mem.Allocator;
+const GeneralPurposeAllocator = std.heap.GeneralPurposeAllocator;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
+const sleep = std.time.sleep;
 
 const Delta = struct {
     hours: u8,
     minutes: u8,
 
-    fn parse(alloc: Allocator, buf: []const u8) !Delta {
+    fn parse(alloc: Allocator, delta_str: []const u8) !Delta {
         var hours: u8 = 0;
         var minutes: u8 = 0;
         var number = ArrayList(u8).init(alloc);
         defer number.deinit();
 
-        for (buf) |c| {
+        for (delta_str) |c| {
             switch (c) {
                 'h' => {
                     hours = try std.fmt.parseInt(u8, number.items, 10);
@@ -43,7 +45,7 @@ const Delta = struct {
 };
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var gpa = GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
     const params = comptime clap.parseParamsComptime(
@@ -87,13 +89,13 @@ pub fn main() !void {
     const nsh = std.time.ns_per_hour;
     const nsm = std.time.ns_per_min;
     const nanoseconds = @as(u64, delta.hours) * nsh + @as(u64, delta.minutes) * nsm;
-    std.time.sleep(nanoseconds);
+    sleep(nanoseconds);
     print("\x1b[2J\x1b[H\n", .{});
 
     const message = if (res.positionals.len >= 2) res.positionals[1] else "Time is up!";
     while (true) {
         print("\x07{s}\n", .{message});
         if (res.args.once != 0) return;
-        std.time.sleep(0.5 * nsm);
+        sleep(0.5 * nsm);
     }
 }
