@@ -1,11 +1,14 @@
 const std = @import("std");
 const clap = @import("clap");
+const mem = std.mem;
+const Allocator = mem.Allocator;
+const print = std.debug.print;
 
 const Delta = struct {
     hours: u8,
     minutes: u8,
 
-    fn parse(alloc: std.mem.Allocator, buf: []const u8) !Delta {
+    fn parse(alloc: Allocator, buf: []const u8) !Delta {
         var hours: u8 = 0;
         var minutes: u8 = 0;
         var number = std.ArrayList(u8).init(alloc);
@@ -65,30 +68,30 @@ pub fn main() !void {
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
 
     if (res.positionals.len == 0)
-        return std.debug.print("Usage: remind [OPTIONS] <DELTA> [MESSAGE]", .{});
+        return print("Usage: remind [OPTIONS] <DELTA> [MESSAGE]", .{});
 
     const delta = Delta.parse(gpa.allocator(), res.positionals[0]) catch |err| {
         switch (err) {
             error.Overflow => {
-                std.debug.print("Duration too long.\n", .{});
+                print("Duration too long.\n", .{});
             },
             else => {
-                std.debug.print("Syntax error.\n", .{});
+                print("Syntax error.\n", .{});
             },
         }
         return;
     };
-    std.debug.print("Remind in {} hour(s) and {} minute(s).\n", .{ delta.hours, delta.minutes });
+    print("Remind in {} hour(s) and {} minute(s).\n", .{ delta.hours, delta.minutes });
 
     const nsh = std.time.ns_per_hour;
     const nsm = std.time.ns_per_min;
     const nanoseconds = @as(u64, delta.hours) * nsh + @as(u64, delta.minutes) * nsm;
     std.time.sleep(nanoseconds);
-    std.debug.print("\x1b[2J\x1b[H\n", .{});
+    print("\x1b[2J\x1b[H\n", .{});
 
     const message = if (res.positionals.len >= 2) res.positionals[1] else "Time is up!";
     while (true) {
-        std.debug.print("\x07{s}\n", .{message});
+        print("\x07{s}\n", .{message});
         if (res.args.once != 0) return;
         std.time.sleep(0.5 * nsm);
     }
