@@ -44,6 +44,33 @@ const Delta = struct {
     }
 };
 
+fn remind(alloc: Allocator, delta_str: []const u8, message: []const u8, once: bool) !void {
+    const delta = Delta.parse(alloc, delta_str) catch |err| {
+        switch (err) {
+            error.Overflow => {
+                print("Duration too long.\n", .{});
+            },
+            else => {
+                print("Syntax error.\n", .{});
+            },
+        }
+        return;
+    };
+    print("Remind in {} hour(s) and {} minute(s).\n", .{ delta.hours, delta.minutes });
+
+    const nsh = std.time.ns_per_hour;
+    const nsm = std.time.ns_per_min;
+    const nanoseconds = @as(u64, delta.hours) * nsh + @as(u64, delta.minutes) * nsm;
+    sleep(nanoseconds);
+    print("\x1b[2J\x1b[H\n", .{});
+
+    while (true) {
+        print("\x07{s}\n", .{message});
+        if (once) return;
+        sleep(0.5 * nsm);
+    }
+}
+
 pub fn main() !void {
     var gpa = GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
@@ -69,33 +96,13 @@ pub fn main() !void {
 
     if (res.args.help != 0)
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
-
     if (res.positionals.len == 0)
         return print("Usage: remind [OPTIONS] <DELTA> [MESSAGE]", .{});
 
-    const delta = Delta.parse(gpa.allocator(), res.positionals[0]) catch |err| {
-        switch (err) {
-            error.Overflow => {
-                print("Duration too long.\n", .{});
-            },
-            else => {
-                print("Syntax error.\n", .{});
-            },
-        }
-        return;
-    };
-    print("Remind in {} hour(s) and {} minute(s).\n", .{ delta.hours, delta.minutes });
-
-    const nsh = std.time.ns_per_hour;
-    const nsm = std.time.ns_per_min;
-    const nanoseconds = @as(u64, delta.hours) * nsh + @as(u64, delta.minutes) * nsm;
-    sleep(nanoseconds);
-    print("\x1b[2J\x1b[H\n", .{});
-
-    const message = if (res.positionals.len >= 2) res.positionals[1] else "Time is up!";
-    while (true) {
-        print("\x07{s}\n", .{message});
-        if (res.args.once != 0) return;
-        sleep(0.5 * nsm);
+    const once = res.args.once != 0;
+    if (res.positionals.len >= 2) {
+        try remind(gpa.allocator(), res.positionals[0], res.positionals[1], once);
+    } else {
+        try remind(gpa.allocator(), res.positionals[0], "Time is up!", once);
     }
 }
