@@ -1,5 +1,11 @@
+# all
+**/dist/
+
 # rust
 **/target/
+
+# typescript
+**/node_modules/
 
 # zig
 **/zig-out/
