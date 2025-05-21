@@ -1,21 +1,21 @@
 {
-  "name": "todo",
-  "version": "1.0.0",
-  "description": "Simple CLI TODO app.",
-  "main": "todo.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Vasco Costa",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/chalk": "^0.4.31",
-    "@types/node": "^22.15.20",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "chalk": "^5.4.1",
-    "commander": "^14.0.0",
-    "neverthrow": "^8.2.0"
-  }
+    "name": "todo",
+    "version": "1.0.0",
+    "description": "Simple CLI TODO app.",
+    "main": "todo.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Vasco Costa",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/chalk": "^0.4.31",
+        "@types/node": "^22.15.20",
+        "typescript": "^5.8.3"
+    },
+    "dependencies": {
+        "chalk": "^5.4.1",
+        "commander": "^14.0.0",
+        "neverthrow": "^8.2.0"
+    }
 }
